@@ -55,9 +55,9 @@ function createGraph(canvasID, labels, labelDivID, intervalSize, maxVal, scalest
 ```
 **Arguments** :
 
-+ **canvasId** : The id of `<canvas>` tag for the graph.
++ **canvasID** : The id of `<canvas>` tag for the graph.
 + **Labels** : List/array of string for label names.
-+ **labelDivId**: ID of the `<div>` tag to place graph labels/legend.
++ **labelDivID**: ID of the `<div>` tag to place graph labels/legend.
 + **intervalSize**: Amount to shift the graph on update.
 + **maxVal**: Approximate maximum value. Picograph can autoscale, this 
 argument is only for initial value.
