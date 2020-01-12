@@ -17,7 +17,7 @@ Simple and tiny graphing library for javascript.
         
         <h1>PicoGraphDemo</h1>
         
-        <!-- Canvas for thr geaph -->
+        <!-- Canvas for thr graph -->
         <canvas id="graphDemo" width=900px height=200px 
             style="border:2px solid #000000;image-rendering: crisp-edges;">
         </canvas>
@@ -51,7 +51,7 @@ Simple and tiny graphing library for javascript.
 # Documentation
 [Download picograph.js](picograph.js)
 ```javascript
-createGraph(canvasId, labels, labelDivId, intervalSize, maxVal, scalesteps=5)
+function createGraph(canvasID, labels, labelDivID, intervalSize, maxVal, scalesteps=5)
 ```
 **Arguments** :
 

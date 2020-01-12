@@ -18,10 +18,10 @@ colors = [
     "#c0c0c0", "#ffffff", "#ffff00"
 ]
 
-var byId = function(id) { return document.getElementById(id); };
+var byID = function(id) { return document.getElementByID(id); };
 
 /* Helper function for creating graphs */
-function createGraph(canvasId, labels, labelDivId, intervalSize, maxVal, scalesteps=5)
+function createGraph(canvasID, labels, labelDivID, intervalSize, maxVal, scalesteps=5)
 {
     /* Create valueIDs for each label */
     valueIDs = []
@@ -30,7 +30,7 @@ function createGraph(canvasId, labels, labelDivId, intervalSize, maxVal, scalest
     }
 
     /* Create graph  */
-    var canvas = byId(canvasId);
+    var canvas = byID(canvasID);
     var graph = new Graph(canvas, labels.length, valueIDs, intervalSize, maxVal, scalesteps);
 
     /* Set label colors */
@@ -38,7 +38,7 @@ function createGraph(canvasId, labels, labelDivId, intervalSize, maxVal, scalest
     {
         var colorID = valueIDs[i] + "color";
         
-        byId(labelDivId).innerHTML += `
+        byID(labelDivID).innerHTML += `
             <div style="display: inline-block; padding-left: 2em;">
                 <svg width="10" height="10">
                     <rect id="${colorID}" width="10" height="10"/>
@@ -49,7 +49,7 @@ function createGraph(canvasId, labels, labelDivId, intervalSize, maxVal, scalest
         `
 
         labelcolor = graph.colors[i];
-        byId(colorID).style = "fill:"+labelcolor;
+        byID(colorID).style = "fill:"+labelcolor;
     }
 
     return graph;
@@ -92,7 +92,7 @@ class Graph
     update(yval, labelID)
     {
         /* Update value */
-        byId(this.valueIDs[labelID]).innerHTML = yval.toFixed(2);
+        byID(this.valueIDs[labelID]).innerHTML = yval.toFixed(2);
 
         /* Update scale */
         if(yval > this.maxVal) {
