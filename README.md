@@ -2,6 +2,7 @@
 Simple and tiny graphing library for javascript.
 
 # Demo
+![Demo Image](demo_screenshot.png)
 ```html
 <!DOCTYPE html>
 <html>
@@ -48,7 +49,7 @@ Simple and tiny graphing library for javascript.
 ```javascript
 createGraph(canvasId, labels, labelDivId, intervalSize, maxVal, scalesteps=5)
 ```
-+ **canvasId** : The id of canvas for the graph.
++ **canvasId** : The id of `<canvas>` tag for the graph.
 + **Labels** : List/array of string for label names.
 + **labelDivId**: ID of the `<div>` tag to place graph labels/legend.
 + **intervalSize**: Amount to shift the graph on update.
