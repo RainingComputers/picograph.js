@@ -2,6 +2,8 @@
 # picograph.js
 Simple and tiny graphing library for javascript.
 
+[Download picograph.js](picograph.js)
+
 # Demo
 ![Demo Image](demo_screenshot.png)
 ```html
@@ -47,6 +49,7 @@ Simple and tiny graphing library for javascript.
 ```
 
 # Documentation
+[Download picograph.js](picograph.js)
 ```javascript
 createGraph(canvasId, labels, labelDivId, intervalSize, maxVal, scalesteps=5)
 ```
