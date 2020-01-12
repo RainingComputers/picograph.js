@@ -18,7 +18,7 @@ colors = [
     "#c0c0c0", "#ffffff", "#ffff00"
 ]
 
-var byID = function(id) { return document.getElementByID(id); };
+var byID = function(id) { return document.getElementById(id); };
 
 /* Helper function for creating graphs */
 function createGraph(canvasID, labels, labelDivID, intervalSize, maxVal, scalesteps=5)
