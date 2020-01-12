@@ -53,6 +53,8 @@ Simple and tiny graphing library for javascript.
 ```javascript
 createGraph(canvasId, labels, labelDivId, intervalSize, maxVal, scalesteps=5)
 ```
+**Arguments** :
+
 + **canvasId** : The id of `<canvas>` tag for the graph.
 + **Labels** : List/array of string for label names.
 + **labelDivId**: ID of the `<div>` tag to place graph labels/legend.
@@ -60,3 +62,14 @@ createGraph(canvasId, labels, labelDivId, intervalSize, maxVal, scalesteps=5)
 + **maxVal**: Approximate maximum value. Picograph can autoscale, this 
 argument is only for initial value.
 + **scalesteps**: Number of scale lines to draw on the graph.
+
+**Returns** : `Graph` object.
+
+```javascript
+Graph.update(yval, labelID)
+```
+**Arguments** :
+
++ **yval** : New value to plot.
++ **labelID** : The index of the label to add the point to 
+(in `Labels` argument in `createGraph`).
