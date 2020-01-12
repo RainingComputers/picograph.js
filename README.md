@@ -1,3 +1,4 @@
+![Picograph logo](picographicon128.png)
 # picograph.js
 Simple and tiny graphing library for javascript.
 
