@@ -21,17 +21,17 @@ colors = [
 var byID = function(id) { return document.getElementById(id); };
 
 /* Helper function for creating graphs */
-function createGraph(canvasID, labels, labelDivID, intervalSize, maxVal, scalesteps=5)
+function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, scalesteps=5)
 {
     /* Create valueIDs for each label */
     valueIDs = []
     for(var i = 0; i < labels.length; i++) {
-        valueIDs[i] = labels[i].replace(" ", "") + "value";
+        valueIDs[i] = canvasID + labels[i].replace(" ", "") + "value";
     }
 
     /* Create graph  */
     var canvas = byID(canvasID);
-    var graph = new Graph(canvas, labels.length, valueIDs, intervalSize, maxVal, scalesteps);
+    var graph = new Graph(canvas, labels.length, valueIDs, unit, intervalSize, maxVal, scalesteps);
 
     /* Set label colors */
     for(var i = 0; i < labels.length; i++)
@@ -58,7 +58,7 @@ function createGraph(canvasID, labels, labelDivID, intervalSize, maxVal, scalest
 /* Graph class, plots and updates graphs */
 class Graph
 {
-    constructor(canvas, noLabels, valueIDs, intervalSize, maxVal, scalesteps)
+    constructor(canvas, noLabels, valueIDs, unit, intervalSize, maxVal, scalesteps)
     {
         /* Get the drawing context */
         this.canvas = canvas;
@@ -78,6 +78,7 @@ class Graph
         this.colors = colorArray(noLabels);
         this.maxVal = maxVal;
         this.valueIDs = valueIDs;
+        this.unit = unit;
     }
 
     setWidthHeight()
@@ -91,9 +92,6 @@ class Graph
 
     update(yval, labelID)
     {
-        /* Update value */
-        byID(this.valueIDs[labelID]).innerHTML = yval.toFixed(2);
-
         /* Update scale */
         if(yval > this.maxVal) {
             this.maxVal = yval;
@@ -148,6 +146,9 @@ class Graph
                 this.ctx.stroke();
             }
         }
+
+        /* Update value */
+        byID(this.valueIDs[labelID]).innerHTML = yval.toFixed(2)+' '+this.unit;
 
     }
 

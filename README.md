@@ -27,7 +27,7 @@ Simple and tiny graphing library for javascript.
 
         <script>
             /* Create graph using picograph */
-            var demograph = createGraph("graphDemo", ["Random Y0", "Random Y1"],
+            var demograph = createGraph("graphDemo", ["Random Y0", "Random Y1"], "units"
                 "graphLabels", 20, 10);
 
             /* Update values every second */
@@ -51,12 +51,13 @@ Simple and tiny graphing library for javascript.
 # Documentation
 [Download picograph.js](picograph.js)
 ```javascript
-function createGraph(canvasID, labels, labelDivID, intervalSize, maxVal, scalesteps=5)
+function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, scalesteps=5)
 ```
 **Arguments** :
 
 + **canvasID** : The id of `<canvas>` tag for the graph.
-+ **Labels** : List/array of string for label names.
++ **labels** : List/array of string for label names.
++ **unit** : The unit for the values.
 + **labelDivID**: ID of the `<div>` tag to place graph labels/legend.
 + **intervalSize**: Amount to shift the graph on update.
 + **maxVal**: Approximate maximum value. Picograph can autoscale, this 
