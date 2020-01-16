@@ -83,9 +83,11 @@ class Graph
 
     setWidthHeight()
     {
+        this.cssScale = window.devicePixelRatio;
+
         /* Set canvas height and width */
-        this.canvas.width = this.canvas.clientWidth;
-        this.canvas.height = this.canvas.clientHeight;
+        this.canvas.width = this.canvas.clientWidth*this.cssScale;
+        this.canvas.height = this.canvas.clientHeight*this.cssScale;
         this.width = this.ctx.canvas.width;
         this.height = this.ctx.canvas.height;
     }
@@ -110,16 +112,18 @@ class Graph
         this.intervalSize = this.width/this.nValuesFloat;
 
         /* Set line width */
-        this.ctx.lineWidth = 2;
+        this.ctx.lineWidth = 2*this.cssScale;
 
         /* Draw scale */
-        this.ctx.font = "10px"
+        this.ctx.font = (10*this.cssScale)+"px monospace";
         var hstep = this.height/this.scalesteps;
         var sstep = this.maxVal/this.scalesteps;
         for(var i = 1; i <= this.scalesteps; i++)
         {
             var y = this.height-i*hstep
-            this.ctx.fillText((i*sstep).toFixed(2), 2, y+12);
+            var xoffset = 2*this.cssScale;
+            var yoffset = 12*this.cssScale;
+            this.ctx.fillText((i*sstep).toFixed(2), xoffset, y+yoffset);
             this.ctx.beginPath();
             this.ctx.moveTo(0, y);
             this.ctx.lineTo(this.width, y);

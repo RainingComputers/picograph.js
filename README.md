@@ -18,8 +18,8 @@ Simple and tiny graphing library for javascript.
         <h1>PicoGraphDemo</h1>
         
         <!-- Canvas for thr graph -->
-        <canvas id="graphDemo" width=900px height=200px 
-            style="border:2px solid #000000;image-rendering: crisp-edges;">
+        <canvas id="graphDemo" 
+            style="width: 900px; height:200px; border:2px solid #000000;">
         </canvas>
         
         <!-- div for legends/labels -->
@@ -27,7 +27,7 @@ Simple and tiny graphing library for javascript.
 
         <script>
             /* Create graph using picograph */
-            var demograph = createGraph("graphDemo", ["Random Y0", "Random Y1"], "units"
+            var demograph = createGraph("graphDemo", ["Random Y0", "Random Y1"], "units",
                 "graphLabels", 20, 10);
 
             /* Update values every second */
@@ -50,6 +50,7 @@ Simple and tiny graphing library for javascript.
 
 # Documentation
 [Download picograph.js](picograph.js)
+
 ```javascript
 function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, scalesteps=5)
 ```
@@ -74,3 +75,17 @@ Graph.update(yval, labelID)
 + **yval** : New value to plot.
 + **labelID** : The index of the label to add the point to 
 (in `Labels` argument in `createGraph`).
+
+# Note
+Always use CSS or `style` to set height and width of the canvas. 
+Do not use `height` and `width` attributes of the canvas tag, it may cause scaling issues.
+
+**Correct Way:**
+```html
+<canvas id="graphDemo" style="width: 900px; height:200px">
+```
+
+**Incorrect Way:**
+```html
+<canvas id="graphDemo" width=900 height=200">
+```
