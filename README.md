@@ -52,7 +52,8 @@ Simple and tiny graphing library for javascript.
 [Download picograph.js](picograph.js)
 
 ```javascript
-function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal,vlines=false, timestamps=false, scalesteps=5)
+function createGraph(canvasID, labels, unit, labelDivID, intervalSize,
+    maxVal, vlines=false, timestamps=false, scalesteps=5)
 ```
 **Arguments** :
 
