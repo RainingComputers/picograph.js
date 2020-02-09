@@ -17,7 +17,7 @@ Simple and tiny graphing library for javascript.
         
         <h1>PicoGraphDemo</h1>
         
-        <!-- Canvas for thr graph -->
+        <!-- Canvas for the graph -->
         <canvas id="graphDemo" 
             style="width: 900px; height:200px; border:2px solid #000000;">
         </canvas>
