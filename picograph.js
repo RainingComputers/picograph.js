@@ -21,7 +21,8 @@ colors = [
 var byID = function(id) { return document.getElementById(id); };
 
 /* Helper function for creating graphs */
-function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, scalesteps=5)
+function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, 
+    vlines=false, timestamps=false, scalesteps=5)
 {
     /* Create valueIDs for each label */
     valueIDs = []
@@ -31,7 +32,8 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, s
 
     /* Create graph  */
     var canvas = byID(canvasID);
-    var graph = new Graph(canvas, labels.length, valueIDs, unit, intervalSize, maxVal, scalesteps);
+    var graph = new Graph(canvas, labels.length, valueIDs, unit, intervalSize, maxVal, 
+        vlines, timestamps, scalesteps);
 
     /* Set label colors */
     for(var i = 0; i < labels.length; i++)
@@ -58,7 +60,7 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, s
 /* Graph class, plots and updates graphs */
 class Graph
 {
-    constructor(canvas, noLabels, valueIDs, unit, intervalSize, maxVal, scalesteps)
+    constructor(canvas, noLabels, valueIDs, unit, intervalSize, maxVal, vlines, timestamps, scalesteps)
     {
         /* Get the drawing context */
         this.canvas = canvas;
@@ -68,17 +70,20 @@ class Graph
         /* Set proper height and width */
         this.setWidthHeight()
 
-        /* Initilize class varibles */
+        /* Initialize class variables */
         this.scalesteps = scalesteps
         this.noLabels = noLabels;
         this.intervalSize = intervalSize;
         this.nValuesFloat = this.width/intervalSize
         this.nValues = Math.round(this.nValuesFloat)+1;
         this.points = emptyArray(noLabels, this.nValues);
+        this.timestamps_array = emptyArray(1, this.nValues, "");
         this.colors = colorArray(noLabels);
         this.maxVal = maxVal;
         this.valueIDs = valueIDs;
         this.unit = unit;
+        this.vlines = vlines;
+        this.timestamps = timestamps;
     }
 
     setWidthHeight()
@@ -92,15 +97,25 @@ class Graph
         this.height = this.ctx.canvas.height;
     }
 
-    update(yval, labelID)
+    update(values)
     {
-        /* Update scale */
-        if(yval > this.maxVal) {
-            this.maxVal = yval;
-        }
+        for(var i = 0; i < this.noLabels; i++) {
+            /* Update scale */
+            if(values[i] > this.maxVal) {
+                this.maxVal = values[i];
+            }
 
-        /* Shift new point into points array */
-        this.points = shiftArrayRowLeft(this.points, labelID, this.nValues, yval);
+            /* Shift new point into points array */
+            this.points = shiftArrayRowLeft(this.points, i, this.nValues, values[i]);
+
+            /* Update value */
+            byID(this.valueIDs[i]).innerHTML = values[i].toFixed(2)+' '+this.unit;
+        } 
+
+        /* Log time and add to timestamps_array array */
+        var d = new Date();
+        var timestamp_str = d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
+        this.timestamps_array = shiftArrayRowLeft(this.timestamps_array, 0, this.nValues, timestamp_str);
 
         /* Clear canvas */
         this.ctx.clearRect(0, 0, this.width, this.height);
@@ -114,8 +129,27 @@ class Graph
         /* Set line width */
         this.ctx.lineWidth = 2*this.cssScale;
 
-        /* Draw scale */
+        /* Set font for canvas */
         this.ctx.font = (10*this.cssScale)+"px monospace";
+
+        /* Draw vertical scale */
+        if(this.vlines)
+        {
+            for(var i = this.nValues-1; i >= 0; i--)
+            {
+                /* Calculate line coordinates */
+                var x = (i+1)*this.intervalSize;
+    
+                /* Draw line */
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, 0);
+                this.ctx.lineTo(x, this.height);
+                this.ctx.strokeStyle = "#e3e3e3";
+                this.ctx.stroke();
+            }   
+        }
+
+        /* Draw horizontal scale */
         var hstep = this.height/this.scalesteps;
         var sstep = this.maxVal/this.scalesteps;
         for(var i = 1; i <= this.scalesteps; i++)
@@ -130,6 +164,27 @@ class Graph
             this.ctx.strokeStyle = "#e3e3e3";
             this.ctx.stroke();
         }
+        
+        /* Draw time stamps */
+        if(this.timestamps)
+        {
+            var xBoundPix = this.ctx.measureText((this.scalesteps*sstep).toFixed(2)).width;
+            var xBound = Math.floor((xBoundPix/this.intervalSize)+1)
+            for(var i = this.nValues-1; i >= xBound; i--)
+            {
+                /* Calculate line coordinates */
+                var x = (i+1)*this.intervalSize;
+    
+    
+                /* Put time stamps */
+                var xoffset = 12*this.cssScale;
+                var yoffset = this.ctx.measureText(this.timestamps_array[0][i]).width+4*this.cssScale;
+                this.ctx.rotate(Math.PI/2);
+                this.ctx.fillText(this.timestamps_array[0][i], this.height-yoffset, -x+xoffset);
+                this.ctx.stroke();
+                this.ctx.rotate(-Math.PI/2);
+            }               
+        }  
 
         /* Draw graph */
         for(var i = 0; i < this.noLabels; i++)
@@ -150,9 +205,6 @@ class Graph
                 this.ctx.stroke();
             }
         }
-
-        /* Update value */
-        byID(this.valueIDs[labelID]).innerHTML = yval.toFixed(2)+' '+this.unit;
 
     }
 
@@ -178,13 +230,13 @@ function shiftArrayRowLeft(array, row, ncols, newVal)
 }
 
 /* Helper function to create an empty */
-function emptyArray(nrows, ncols) 
+function emptyArray(nrows, ncols, fill=0) 
 {
     var arr = [];
     for(var i = 0; i < nrows; i++) {
         arr[i] = [];
         for(var j = 0; j < ncols; j++) {
-            arr[i][j] = 0;
+            arr[i][j] = fill;
         }
     }
     return arr;

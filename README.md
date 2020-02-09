@@ -27,8 +27,9 @@ Simple and tiny graphing library for javascript.
 
         <script>
             /* Create graph using picograph */
-            var demograph = createGraph("graphDemo", ["Random Y0", "Random Y1"], "units",
-                "graphLabels", 20, 10);
+            var demograph = createGraph("graphDemo", 
+                ["Random Y0", "Random Y1"], 
+                "units", "graphLabels", 50, 10, true, true);
 
             /* Update values every second */
             setInterval(updateEverySecond, 1000);
@@ -39,8 +40,7 @@ Simple and tiny graphing library for javascript.
                 yrand1 = Math.random()*10;
 
                 /* Update graph */
-                demograph.update(yrand0, 0);
-                demograph.update(yrand1, 1)
+                demograph.update([yrand0, yrand1])
             }
 
         </script>
@@ -52,7 +52,7 @@ Simple and tiny graphing library for javascript.
 [Download picograph.js](picograph.js)
 
 ```javascript
-function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, scalesteps=5)
+function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal,vlines=false, timestamps=false, scalesteps=5)
 ```
 **Arguments** :
 
@@ -63,18 +63,18 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, s
 + **intervalSize**: Amount to shift the graph on update.
 + **maxVal**: Approximate maximum value. Picograph can autoscale, this 
 argument is only for initial value.
++ **vlines**: Show vertical lines.
++ **timestamps**: Show timestamps.
 + **scalesteps**: Number of scale lines to draw on the graph.
 
 **Returns** : `Graph` object.
 
 ```javascript
-Graph.update(yval, labelID)
+Graph.update(values)
 ```
 **Arguments** :
 
-+ **yval** : New value to plot.
-+ **labelID** : The index of the label to add the point to 
-(in `Labels` argument in `createGraph`).
++ **values** : Array of values to add to the graph.
 
 # Note
 Always use CSS or `style` to set height and width of the canvas. 
