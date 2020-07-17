@@ -40,7 +40,7 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal,
         const colorID = valueIDs[i] + "color";
         
         byID(labelDivID).innerHTML += `
-            <div style="display: inline-block; padding-left: 2em;">
+            <div style="display: inline-block;">
                 <svg width="10" height="10">
                     <rect id="${colorID}" width="10" height="10"/>
                 </svg> 

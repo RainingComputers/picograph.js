@@ -86,6 +86,11 @@ Do not use `height` and `width` attributes of the canvas tag, it may cause scali
 <canvas id="graphDemo" style="width: 900px; height:200px">
 ```
 
+Or you can use CSS flex box, the canvas should be surrounded by
+```html
+<div style="flex-basis: 0; flex-grow: 1;">
+```
+
 **Incorrect Way:**
 ```html
 <canvas id="graphDemo" width=900 height=200">
