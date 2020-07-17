@@ -10,7 +10,7 @@ colors = [
     "#a52a2a", "#00008b", "#008b8b", "#a9a9a9", 
     "#006400", "#bdb76b", "#8b008b", "#556b2f", 
     "#ff8c00", "#9932cc", "#8b0000", "#e9967a", 
-    "#9400d3", "#ff00ff",  "#ffd700", "#008000", 
+    "#9400d3", "#ff00ff", "#ffd700", "#008000", 
     "#4b0082", "#f0e68c", "#add8e6", "#e0ffff", 
     "#90ee90", "#d3d3d3", "#ffb6c1", "#ffffe0", 
     "#800000", "#000080", "#808000", "#ffa500", 
@@ -18,7 +18,7 @@ colors = [
     "#c0c0c0", "#ffffff", "#ffff00"
 ]
 
-var byID = function(id) { return document.getElementById(id); };
+const byID = function(id) { return document.getElementById(id); };
 
 /* Helper function for creating graphs */
 function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, 
@@ -26,19 +26,18 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal,
 {
     /* Create valueIDs for each label */
     valueIDs = []
-    for(var i = 0; i < labels.length; i++) {
+    for(let i = 0; i < labels.length; i++) {
         valueIDs[i] = canvasID + labels[i].replace(" ", "") + "value";
     }
 
     /* Create graph  */
-    var canvas = byID(canvasID);
-    var graph = new Graph(canvas, labels.length, valueIDs, unit, intervalSize, maxVal, 
+    const graph = new Graph(canvasID, labels.length, valueIDs, unit, intervalSize, maxVal, 
         vlines, timestamps, scalesteps);
 
     /* Set label colors */
-    for(var i = 0; i < labels.length; i++)
+    for(let i = 0; i < labels.length; i++)
     {
-        var colorID = valueIDs[i] + "color";
+        const colorID = valueIDs[i] + "color";
         
         byID(labelDivID).innerHTML += `
             <div style="display: inline-block; padding-left: 2em;">
@@ -60,21 +59,22 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal,
 /* Graph class, plots and updates graphs */
 class Graph
 {
-    constructor(canvas, noLabels, valueIDs, unit, intervalSize, maxVal, vlines, timestamps, scalesteps)
+    constructor(canvasID, noLabels, valueIDs, unit, intervalSize, maxVal, vlines, timestamps, scalesteps)
     {
         /* Get the drawing context */
-        this.canvas = canvas;
-        var ctx = canvas.getContext("2d");
+        this.canvas = byID(canvasID);
+        const ctx = this.canvas.getContext("2d");
         this.ctx = ctx;
         
         /* Set proper height and width */
         this.setWidthHeight()
 
-        /* Initialize class variables */
+        /* Initialize class constiables */
+        this.cssScale = window.devicePixelRatio;
         this.scalesteps = scalesteps
         this.noLabels = noLabels;
-        this.intervalSize = intervalSize;
-        this.nValuesFloat = this.width/intervalSize
+        this.intervalSize = intervalSize*this.cssScale;
+        this.nValuesFloat = this.width/this.intervalSize
         this.nValues = Math.round(this.nValuesFloat)+1;
         this.points = emptyArray(noLabels, this.nValues);
         this.timestamps_array = emptyArray(1, this.nValues, "");
@@ -99,7 +99,7 @@ class Graph
 
     update(values)
     {
-        for(var i = 0; i < this.noLabels; i++) {
+        for(let i = 0; i < this.noLabels; i++) {
             /* Update scale */
             if(values[i] > this.maxVal) {
                 this.maxVal = values[i];
@@ -113,8 +113,8 @@ class Graph
         } 
 
         /* Log time and add to timestamps_array array */
-        var d = new Date();
-        var timestamp_str = d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
+        const d = new Date();
+        const timestamp_str = d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
         this.timestamps_array = shiftArrayRowLeft(this.timestamps_array, 0, this.nValues, timestamp_str);
 
         /* Clear canvas */
@@ -129,16 +129,13 @@ class Graph
         /* Set line width */
         this.ctx.lineWidth = 2*this.cssScale;
 
-        /* Set font for canvas */
-        this.ctx.font = (10*this.cssScale)+"px monospace";
-
         /* Draw vertical scale */
         if(this.vlines)
         {
-            for(var i = this.nValues-1; i >= 0; i--)
+            for(let i = this.nValues-1; i >= 0; i--)
             {
                 /* Calculate line coordinates */
-                var x = (i+1)*this.intervalSize;
+                const x = (i+1)*this.intervalSize;
     
                 /* Draw line */
                 this.ctx.beginPath();
@@ -149,14 +146,20 @@ class Graph
             }   
         }
 
+        /* Calculate font size and space between scale lines */
+        const hstep = this.height/this.scalesteps;
+        const sstep = this.maxVal/this.scalesteps;
+
+        const canvas_font = Math.min(0.5*hstep, 15*this.cssScale)
+        this.ctx.font = canvas_font+"px monospace";
+        
+        
         /* Draw horizontal scale */
-        var hstep = this.height/this.scalesteps;
-        var sstep = this.maxVal/this.scalesteps;
-        for(var i = 1; i <= this.scalesteps; i++)
+        for(let i = 1; i <= this.scalesteps; i++)
         {
-            var y = this.height-i*hstep
-            var xoffset = 2*this.cssScale;
-            var yoffset = 12*this.cssScale;
+            const y = this.height-i*hstep
+            const xoffset = 2;
+            const yoffset = canvas_font+2*this.cssScale;
             this.ctx.fillText((i*sstep).toFixed(2), xoffset, y+yoffset);
             this.ctx.beginPath();
             this.ctx.moveTo(0, y);
@@ -168,17 +171,17 @@ class Graph
         /* Draw time stamps */
         if(this.timestamps)
         {
-            var xBoundPix = this.ctx.measureText((this.scalesteps*sstep).toFixed(2)).width;
-            var xBound = Math.floor((xBoundPix/this.intervalSize)+1)
-            for(var i = this.nValues-1; i >= xBound; i--)
+            const xBoundPix = this.ctx.measureText((this.scalesteps*sstep).toFixed(2)).width;
+            const xBound = Math.floor((xBoundPix/this.intervalSize)+1)
+            for(let i = this.nValues-1; i >= xBound; i--)
             {
                 /* Calculate line coordinates */
-                var x = (i+1)*this.intervalSize;
+                const x = (i+1)*this.intervalSize;
     
     
                 /* Put time stamps */
-                var xoffset = 12*this.cssScale;
-                var yoffset = this.ctx.measureText(this.timestamps_array[0][i]).width+4*this.cssScale;
+                const xoffset = canvas_font+2*this.cssScale;
+                const yoffset = this.ctx.measureText(this.timestamps_array[0][i]).width+4*this.cssScale;
                 this.ctx.rotate(Math.PI/2);
                 this.ctx.fillText(this.timestamps_array[0][i], this.height-yoffset, -x+xoffset);
                 this.ctx.stroke();
@@ -187,15 +190,15 @@ class Graph
         }  
 
         /* Draw graph */
-        for(var i = 0; i < this.noLabels; i++)
+        for(let i = 0; i < this.noLabels; i++)
         {
-            for(var j = this.nValues-1; j > 0; j--)
+            for(let j = this.nValues-1; j > 0; j--)
             {
                 /* Calculate line coordinates */
-                var xstart = (j+1)*this.intervalSize;
-                var xend = j*this.intervalSize;
-                var ystart = scaleInvert(this.points[i][j], this.maxVal, this.height);
-                var yend = scaleInvert(this.points[i][j-1], this.maxVal, this.height);
+                const xstart = (j+1)*this.intervalSize;
+                const xend = j*this.intervalSize;
+                const ystart = scaleInvert(this.points[i][j], this.maxVal, this.height);
+                const yend = scaleInvert(this.points[i][j-1], this.maxVal, this.height);
                 
                 /* Draw line */
                 this.ctx.beginPath();
@@ -220,7 +223,7 @@ function scaleInvert(value, maxVal, height)
 /* Helper function that shifts the contents of row to left */
 function shiftArrayRowLeft(array, row, ncols, newVal)
 {
-    for(var i = 0; i < ncols-1; i++) {
+    for(let i = 0; i < ncols-1; i++) {
         array[row][i] = array[row][i+1];
     }
 
@@ -232,10 +235,10 @@ function shiftArrayRowLeft(array, row, ncols, newVal)
 /* Helper function to create an empty */
 function emptyArray(nrows, ncols, fill=0) 
 {
-    var arr = [];
-    for(var i = 0; i < nrows; i++) {
+    const arr = [];
+    for(let i = 0; i < nrows; i++) {
         arr[i] = [];
-        for(var j = 0; j < ncols; j++) {
+        for(let j = 0; j < ncols; j++) {
             arr[i][j] = fill;
         }
     }
@@ -245,8 +248,8 @@ function emptyArray(nrows, ncols, fill=0)
 /* Helper function to create array of colors */
 function colorArray(len)
 {
-    var colorArray = [];
-    for(var i = 0; i < len; i++)
+    const colorArray = [];
+    for(let i = 0; i < len; i++)
     {
         colorArray[i] = colors[i%colors.length];
     }
