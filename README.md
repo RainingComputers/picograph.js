@@ -53,7 +53,7 @@ Simple and tiny graphing library for javascript.
 
 ```javascript
 function createGraph(canvasID, labels, unit, labelDivID, intervalSize,
-    maxVal, vlines=false, timestamps=false, scalesteps=5)
+    maxVal, vlines=false, timestamps=false, scalesteps=5, vlinesFreq = 1)
 ```
 **Arguments** :
 
@@ -61,12 +61,14 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize,
 + **labels** : List/array of string for label names.
 + **unit** : The unit for the values.
 + **labelDivID**: ID of the `<div>` tag to place graph labels/legend.
-+ **intervalSize**: Amount to shift the graph on update.
++ **intervalSize**: Amount of pixels to shift the graph on update.
 + **maxVal**: Approximate maximum value. Picograph can autoscale, this 
 argument is only for initial value.
 + **vlines**: Show vertical lines.
 + **timestamps**: Show timestamps.
 + **scalesteps**: Number of scale lines to draw on the graph.
++ **vlinesFreq**: Vertical lines and timestamps will be drawn every `vlinesFreq*intervalSize`. Increase this
+    if the vertical lines are too crowded.
 
 **Returns** : `Graph` object.
 

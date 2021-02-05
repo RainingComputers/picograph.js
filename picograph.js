@@ -22,7 +22,7 @@ const byID = function (id) { return document.getElementById(id); };
 
 /* Helper function for creating graphs */
 function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal,
-    vlines = false, timestamps = false, scalesteps = 5) {
+    vlines = false, timestamps = false, scalesteps = 5, vlinesFreq = 1) {
     /* Create valueIDs for each label */
     const valueIDs = []
     for (let i = 0; i < labels.length; i++) {
@@ -31,7 +31,7 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal,
 
     /* Create graph  */
     const graph = new Graph(canvasID, labels.length, valueIDs, unit, intervalSize, maxVal,
-        vlines, timestamps, scalesteps);
+        vlines, timestamps, scalesteps, vlinesFreq);
 
     /* Set label colors */
     for (let i = 0; i < labels.length; i++) {
@@ -56,7 +56,7 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal,
 
 /* Graph class, plots and updates graphs */
 class Graph {
-    constructor(canvasID, noLabels, valueIDs, unit, intervalSize, maxVal, vlines, timestamps, scalesteps) {
+    constructor(canvasID, noLabels, valueIDs, unit, intervalSize, maxVal, vlines, timestamps, scalesteps, vlinesFreq) {
         /* Get the drawing context */
         this.canvas = byID(canvasID);
         const ctx = this.canvas.getContext("2d");
@@ -80,6 +80,7 @@ class Graph {
         this.unit = unit;
         this.vlines = vlines;
         this.timestamps = timestamps;
+        this.vlinesFreq = vlinesFreq;
     }
 
     setWidthHeight() {
@@ -125,7 +126,7 @@ class Graph {
 
         /* Draw vertical scale */
         if (this.vlines) {
-            for (let i = this.nValues - 1; i >= 0; i--) {
+            for (let i = this.nValues - 1; i >= 0; i -= this.vlinesFreq) {
                 /* Calculate line coordinates */
                 const x = (i + 1) * this.intervalSize;
 
@@ -163,7 +164,7 @@ class Graph {
         if (this.timestamps) {
             const xBoundPix = this.ctx.measureText((this.scalesteps * sstep).toFixed(2)).width;
             const xBound = Math.floor((xBoundPix / this.intervalSize) + 1)
-            for (let i = this.nValues - 1; i >= xBound; i--) {
+            for (let i = this.nValues - 1; i >= xBound; i -= this.vlinesFreq) {
                 /* Calculate line coordinates */
                 const x = (i + 1) * this.intervalSize;
 
