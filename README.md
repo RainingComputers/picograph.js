@@ -29,7 +29,7 @@ Simple and tiny graphing library for javascript.
             /* Create graph using picograph */
             var demograph = createGraph("graphDemo", 
                 ["Random Y0", "Random Y1"], 
-                "units", "graphLabels", 50, 10, true, true);
+                "units", "graphLabels", 50, 10, 0, true, true);
 
             /* Update values every second */
             setInterval(updateEverySecond, 1000);
@@ -64,11 +64,13 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize,
 + **intervalSize**: Amount of pixels to shift the graph on update.
 + **maxVal**: Approximate maximum value. Picograph can autoscale, this 
 argument is only for initial value.
++ **minVal**: Approximate minimum value. Picograph can autoscale, this 
+argument is only for initial value.
 + **vlines**: Show vertical lines.
 + **timestamps**: Show timestamps.
 + **scalesteps**: Number of scale lines to draw on the graph.
 + **vlinesFreq**: Vertical lines and timestamps will be drawn every `vlinesFreq*intervalSize`. Increase this
-    if the vertical lines are too crowded.
+if the vertical lines are too crowded.
 
 **Returns** : `Graph` object.
 

@@ -21,7 +21,7 @@ const colors = [
 const byID = function (id) { return document.getElementById(id); };
 
 /* Helper function for creating graphs */
-function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal,
+function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, minVal = 0,
     vlines = false, timestamps = false, scalesteps = 5, vlinesFreq = 1) {
     /* Create valueIDs for each label */
     const valueIDs = []
@@ -30,7 +30,7 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal,
     }
 
     /* Create graph  */
-    const graph = new Graph(canvasID, labels.length, valueIDs, unit, intervalSize, maxVal,
+    const graph = new Graph(canvasID, labels.length, valueIDs, unit, intervalSize, maxVal, minVal,
         vlines, timestamps, scalesteps, vlinesFreq);
 
     /* Set label colors */
@@ -56,7 +56,7 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal,
 
 /* Graph class, plots and updates graphs */
 class Graph {
-    constructor(canvasID, noLabels, valueIDs, unit, intervalSize, maxVal, vlines, timestamps, scalesteps, vlinesFreq) {
+    constructor(canvasID, noLabels, valueIDs, unit, intervalSize, maxVal, minVal, vlines, timestamps, scalesteps, vlinesFreq) {
         /* Get the drawing context */
         this.canvas = byID(canvasID);
         const ctx = this.canvas.getContext("2d");
@@ -81,6 +81,7 @@ class Graph {
         this.vlines = vlines;
         this.timestamps = timestamps;
         this.vlinesFreq = vlinesFreq;
+        this.minVal = minVal
     }
 
     setWidthHeight() {
@@ -98,6 +99,10 @@ class Graph {
             /* Update scale */
             if (values[i] > this.maxVal) {
                 this.maxVal = values[i];
+            }
+
+            if (values[i] < this.minVal) {
+                this.minVal = values[i];
             }
 
             /* Shift new point into points array */
@@ -141,7 +146,7 @@ class Graph {
 
         /* Calculate font size and space between scale lines */
         const hstep = this.height / this.scalesteps;
-        const sstep = this.maxVal / this.scalesteps;
+        const sstep = (this.maxVal - this.minVal) / this.scalesteps;
 
         const canvas_font = Math.min(0.5 * hstep, 15 * this.cssScale)
         this.ctx.font = canvas_font + "px monospace";
@@ -152,7 +157,7 @@ class Graph {
             const y = this.height - i * hstep
             const xoffset = 2;
             const yoffset = canvas_font + 2 * this.cssScale;
-            this.ctx.fillText((i * sstep).toFixed(2), xoffset, y + yoffset);
+            this.ctx.fillText(((i * sstep) + this.minVal).toFixed(2), xoffset, y + yoffset);
             this.ctx.beginPath();
             this.ctx.moveTo(0, y);
             this.ctx.lineTo(this.width, y);
@@ -183,10 +188,10 @@ class Graph {
         for (let i = 0; i < this.noLabels; i++) {
             for (let j = this.nValues - 1; j > 0; j--) {
                 /* Calculate line coordinates */
-                const xstart = (j + 1) * this.intervalSize;
-                const xend = j * this.intervalSize;
-                const ystart = scaleInvert(this.points[i][j], this.maxVal, this.height);
-                const yend = scaleInvert(this.points[i][j - 1], this.maxVal, this.height);
+                const xstart = j * this.intervalSize;
+                const xend = (j - 1) * this.intervalSize;
+                const ystart = scaleInvert(this.points[i][j], this.minVal, this.maxVal, this.height);
+                const yend = scaleInvert(this.points[i][j - 1], this.minVal, this.maxVal, this.height);
 
                 /* Draw line */
                 this.ctx.beginPath();
@@ -203,8 +208,8 @@ class Graph {
 
 /* Helper function to take a value value 
     and return y-coordinate for the canvas */
-function scaleInvert(value, maxVal, height) {
-    return (1 - value / maxVal) * height;
+function scaleInvert(value, minVal, maxVal, height) {
+    return (1 - (value - minVal) / (maxVal - minVal)) * height;
 }
 
 /* Helper function that shifts the contents of row to left */
