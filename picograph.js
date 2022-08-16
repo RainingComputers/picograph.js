@@ -29,8 +29,9 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, m
         valueIDs[i] = canvasID + labels[i].replace(" ", "") + "value";
     }
 
-    /* If autoscaling is disabled and min / max are not set, hard-set them to 0 and 100 respectively */
+    /* If autoscaling is disabled (or out of range) and min / max are not set, hard-set them to 0 and 100 respectively */
     if ([1, 2].includes(autoScaleMode) == false) {
+        autoScaleMode = 0;
         if (Number.isFinite(minVal) === false) { minVal = 0; }
         if (Number.isFinite(maxVal) === false) { maxVal = 100; }
     }
@@ -104,17 +105,26 @@ class Graph {
     update(values) {
         for (let i = 0; i < this.noLabels; i++) {
             /* Update scale */
-            if (this.autoScaleMode == 1) {
-                if (values[i] > this.maxVal) {
-                    this.maxVal = Math.ceil(values[i] + 5);
-                }
+            if (this.autoScaleMode > 0) {
+                if (values[i] < this.minVal) { this.minVal = values[i]; }
+                if (values[i] > this.maxVal) { this.maxVal = values[i]; }
 
-                if (values[i] < this.minVal) {
-                    this.minVal = Math.floor(values[i] - 5);
+                let valueMinMaxDelta = Math.abs(this.maxVal - this.minVal);
+                let newMaxVal = Math.ceil(Math.max.apply(Math, this.points.flat().filter(Number.isFinite))) + (valueMinMaxDelta * 0.05);
+                let newMinVal = Math.floor(Math.min.apply(Math, this.points.flat().filter(Number.isFinite))) - (valueMinMaxDelta * 0.05);
+
+                if (this.autoScaleMode == 2) {
+                    this.maxVal = newMaxVal;
+                    this.minVal = newMinVal;
+                } else { /* autoScaleMode == 1 */
+                    if (values[i] > this.maxVal - (valueMinMaxDelta * 0.05)) {
+                        this.maxVal = newMaxVal
+                    }
+
+                    if (values[i] < this.minVal + (valueMinMaxDelta * 0.05)) {
+                        this.minVal = newMinVal
+                    }
                 }
-            } else if (this.autoScaleMode == 2) {
-                this.maxVal = Math.ceil(Math.max.apply(Math, this.points.flat().filter(Number.isFinite)) + 5);
-                this.minVal = Math.floor(Math.min.apply(Math, this.points.flat().filter(Number.isFinite)) - 5);
             }
 
             /* Shift new point into points array */
