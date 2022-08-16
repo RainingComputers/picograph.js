@@ -22,16 +22,22 @@ const byID = function (id) { return document.getElementById(id); };
 
 /* Helper function for creating graphs */
 function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, minVal = 0,
-    vlines = false, timestamps = false, scalesteps = 5, vlinesFreq = 1) {
+    vlines = false, timestamps = false, scalesteps = 5, vlinesFreq = 1, autoScaleMode = 1) {
     /* Create valueIDs for each label */
     const valueIDs = []
     for (let i = 0; i < labels.length; i++) {
         valueIDs[i] = canvasID + labels[i].replace(" ", "") + "value";
     }
 
+    /* If autoscaling is disabled and min / max are not set, hard-set them to 0 and 100 respectively */
+    if ([1, 2].includes(autoScaleMode) == false) {
+        if (Number.isFinite(minVal) === false) { minVal = 0; }
+        if (Number.isFinite(maxVal) === false) { maxVal = 100; }
+    }
+
     /* Create graph  */
     const graph = new Graph(canvasID, labels.length, valueIDs, unit, intervalSize, maxVal, minVal,
-        vlines, timestamps, scalesteps, vlinesFreq);
+        vlines, timestamps, scalesteps, vlinesFreq, autoScaleMode);
 
     /* Set label colors */
     for (let i = 0; i < labels.length; i++) {
@@ -56,7 +62,7 @@ function createGraph(canvasID, labels, unit, labelDivID, intervalSize, maxVal, m
 
 /* Graph class, plots and updates graphs */
 class Graph {
-    constructor(canvasID, noLabels, valueIDs, unit, intervalSize, maxVal, minVal, vlines, timestamps, scalesteps, vlinesFreq) {
+    constructor(canvasID, noLabels, valueIDs, unit, intervalSize, maxVal, minVal, vlines, timestamps, scalesteps, vlinesFreq, autoScaleMode) {
         /* Get the drawing context */
         this.canvas = byID(canvasID);
         const ctx = this.canvas.getContext("2d");
@@ -81,7 +87,8 @@ class Graph {
         this.vlines = vlines;
         this.timestamps = timestamps;
         this.vlinesFreq = vlinesFreq;
-        this.minVal = minVal
+        this.minVal = minVal;
+        this.autoScaleMode = autoScaleMode;
     }
 
     setWidthHeight() {
@@ -97,12 +104,17 @@ class Graph {
     update(values) {
         for (let i = 0; i < this.noLabels; i++) {
             /* Update scale */
-            if (values[i] > this.maxVal) {
-                this.maxVal = values[i];
-            }
+            if (this.autoScaleMode == 1) {
+                if (values[i] > this.maxVal) {
+                    this.maxVal = Math.ceil(values[i] + 5);
+                }
 
-            if (values[i] < this.minVal) {
-                this.minVal = values[i];
+                if (values[i] < this.minVal) {
+                    this.minVal = Math.floor(values[i] - 5);
+                }
+            } else if (this.autoScaleMode == 2) {
+                this.maxVal = Math.ceil(Math.max.apply(Math, this.points.flat().filter(Number.isFinite)) + 5);
+                this.minVal = Math.floor(Math.min.apply(Math, this.points.flat().filter(Number.isFinite)) - 5);
             }
 
             /* Shift new point into points array */
@@ -114,7 +126,7 @@ class Graph {
 
         /* Log time and add to timestamps_array array */
         const d = new Date();
-        const timestamp_str = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+        const timestamp_str = (d.getHours() < 10 ? "0" : "") + d.getHours() + (d.getMinutes() < 10 ? ":0" : ":") + d.getMinutes() + (d.getSeconds() < 10 ? ":0" : ":") + d.getSeconds();
         this.timestamps_array = shiftArrayRowLeft(this.timestamps_array, 0, this.nValues, timestamp_str);
 
         /* Clear canvas */
@@ -153,11 +165,12 @@ class Graph {
 
 
         /* Draw horizontal scale */
+        var entityDecode = document.createElement('textarea'); entityDecode.innerHTML = this.unit;
         for (let i = 1; i <= this.scalesteps; i++) {
             const y = this.height - i * hstep
             const xoffset = 2;
             const yoffset = canvas_font + 2 * this.cssScale;
-            this.ctx.fillText(((i * sstep) + this.minVal).toFixed(2), xoffset, y + yoffset);
+            this.ctx.fillText(((i * sstep) + this.minVal).toFixed(2) + " " + entityDecode.value, xoffset, y + yoffset);
             this.ctx.beginPath();
             this.ctx.moveTo(0, y);
             this.ctx.lineTo(this.width, y);
@@ -224,7 +237,7 @@ function shiftArrayRowLeft(array, row, ncols, newVal) {
 }
 
 /* Helper function to create an empty */
-function emptyArray(nrows, ncols, fill = 0) {
+function emptyArray(nrows, ncols, fill = undefined) {
     const arr = [];
     for (let i = 0; i < nrows; i++) {
         arr[i] = [];

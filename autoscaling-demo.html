@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>PicoGraphDemo</title>
+        <script src="picograph.js"></script>
+    </head>
+    <body style="font-family: Lucida Console, Monaco, monospace;">
+        
+        <h1>PicoGraphDemo</h1>
+        <p>All graphs show the same values but using different scaling</p>
+
+        <hr />
+
+        <h2>No autoscaling: autoScaleMode=0</h2>
+        <!-- Canvas for the graph -->
+        <canvas id="graphDemo1" 
+            style="width: 900px; height:200px; border:2px solid #000000;">
+        </canvas>
+
+        <!-- div for legends/labels -->
+        <div id="graphLabels1"></div>
+
+        <hr />
+
+        <h2>Peak autoscaling: autoScaleMode=1</h2>
+        <!-- Canvas for the graph -->
+        <canvas id="graphDemo2" 
+            style="width: 900px; height:200px; border:2px solid #000000;">
+        </canvas>
+        
+        <!-- div for legends/labels -->
+        <div id="graphLabels2"></div>
+
+        <hr />
+
+        <h2>Constant autoscaling: autoScaleMode=2</h2>
+        <!-- Canvas for the graph -->
+        <canvas id="graphDemo3" 
+            style="width: 900px; height:200px; border:2px solid #000000;">
+        </canvas>
+        
+        <!-- div for legends/labels -->
+        <div id="graphLabels3"></div>
+
+        <script>
+            /* Create graph using picograph */
+            var increment = 0;
+
+            var demograph1 = createGraph("graphDemo1", 
+                ["Random Y0", "Random Y1"], 
+                "&deg;C", "graphLabels1", 5, 100, -100, true, true, 4, 10, 0);
+
+            var demograph2 = createGraph("graphDemo2", 
+                ["Random Y0", "Random Y1"], 
+                "&deg;C", "graphLabels2", 5, null, null, true, true, 4, 10, 1);
+
+            var demograph3 = createGraph("graphDemo3", 
+                ["Random Y0", "Random Y1"], 
+                "&deg;C", "graphLabels3", 5, null, null, true, true, 4, 10, 2);
+
+            /* Update values every 10 times per second */
+            setInterval(updateGraphs, 100);
+
+            function updateGraphs() {
+                /* Get new values */
+                yrand0 = Math.random()*20 + Math.sin(increment) * 100;
+                yrand1 = Math.random()*20 - Math.sin(increment) * 100;
+
+                /* Update graph */
+                demograph1.update([yrand0, yrand1])
+                demograph2.update([yrand0, yrand1])
+                demograph3.update([yrand0, yrand1])
+
+                /* Generate graph flux */
+                increment += 0.0025;
+            }
+
+        </script>
+    </body>
+</html>
