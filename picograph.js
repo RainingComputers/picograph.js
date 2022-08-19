@@ -175,7 +175,7 @@ class Graph {
 
 
         /* Draw horizontal scale */
-        var entityDecode = document.createElement('textarea'); entityDecode.innerHTML = this.unit;
+        let entityDecode = document.createElement('textarea'); entityDecode.innerHTML = this.unit;
         for (let i = 1; i <= this.scalesteps; i++) {
             const y = this.height - i * hstep
             const xoffset = 2;

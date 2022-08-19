@@ -72,7 +72,7 @@ argument is only for initial value.
 + **vlinesFreq**: Vertical lines and timestamps will be drawn every `vlinesFreq*intervalSize`. Increase this
 if the vertical lines are too crowded.
 + **autoScaleMode**: When 0, minVal and maxVal become absolutes. When 1, autoscale to fit peaks only.
-When 2, graph scaling constanly adjusts to fit visible data.
+When 2, graph scaling constantly adjusts to fit visible data.
 
 **Returns** : `Graph` object.
 
