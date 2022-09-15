@@ -147,7 +147,7 @@ class Graph {
         this.nValuesFloat = this.width / this.intervalSize
         this.nValues = Math.round(this.nValuesFloat) + 1
         this.points = emptyArray(noLabels, this.nValues)
-        this.timestamps_array = emptyArray(1, this.nValues, "")
+        this.timestampsArray = emptyArray(1, this.nValues, "")
         this.colors = colorArray(noLabels)
         this.maxVal = maxVal
         this.valueIDs = valueIDs
@@ -212,13 +212,13 @@ class Graph {
     }
 
     updateTimestamps() {
-        const timestamp_str = getTimestamp()
+        const timestampString = getTimestamp()
 
-        this.timestamps_array = shiftArrayRowLeft(
-            this.timestamps_array,
+        this.timestampsArray = shiftArrayRowLeft(
+            this.timestampsArray,
             0,
             this.nValues,
-            timestamp_str
+            timestampString
         )
     }
 
@@ -240,18 +240,18 @@ class Graph {
         const hstep = this.height / this.scalesteps
         const sstep = (this.maxVal - this.minVal) / this.scalesteps
 
-        const canvas_font = Math.min(0.5 * hstep, 15 * this.cssScale)
-        return { canvas_font, hstep, sstep }
+        const canvasFont = Math.min(0.5 * hstep, 15 * this.cssScale)
+        return { canvasFont, hstep, sstep }
     }
 
-    drawHorizontalLines(hstep, canvas_font, sstep) {
+    drawHorizontalLines(hstep, canvasFont, sstep) {
         let entityDecode = document.createElement("textarea")
         entityDecode.innerHTML = this.unit
 
         for (let i = 1; i <= this.scalesteps; i++) {
             const y = this.height - i * hstep
             const xoffset = 2
-            const yoffset = canvas_font + 2 * this.cssScale
+            const yoffset = canvasFont + 2 * this.cssScale
             this.ctx.fillText(
                 (i * sstep + this.minVal).toFixed(2) + " " + entityDecode.value,
                 xoffset,
@@ -265,7 +265,7 @@ class Graph {
         }
     }
 
-    drawTimestamps(sstep, canvas_font) {
+    drawTimestamps(sstep, canvasFont) {
         const xBoundPix = this.ctx.measureText((this.scalesteps * sstep).toFixed(2)).width
         const xBound = Math.floor(xBoundPix / this.intervalSize + 1)
 
@@ -274,11 +274,11 @@ class Graph {
             const x = (i + 1) * this.intervalSize
 
             /* Put time stamps */
-            const xoffset = canvas_font + 2 * this.cssScale
+            const xoffset = canvasFont + 2 * this.cssScale
             const yoffset =
-                this.ctx.measureText(this.timestamps_array[0][i]).width + 4 * this.cssScale
+                this.ctx.measureText(this.timestampsArray[0][i]).width + 4 * this.cssScale
             this.ctx.rotate(Math.PI / 2)
-            this.ctx.fillText(this.timestamps_array[0][i], this.height - yoffset, -x + xoffset)
+            this.ctx.fillText(this.timestampsArray[0][i], this.height - yoffset, -x + xoffset)
             this.ctx.stroke()
             this.ctx.rotate(-Math.PI / 2)
         }
@@ -311,7 +311,7 @@ class Graph {
     update(values) {
         this.updateValues(values)
 
-        /* Log time and add to timestamps_array array */
+        /* Log time and add to timestampsArray array */
         this.updateTimestamps()
 
         /* Clear canvas */
@@ -330,14 +330,14 @@ class Graph {
         if (this.vlines) this.drawVerticalLines()
 
         /* Calculate font size and space between scale lines */
-        const { canvas_font, hstep, sstep } = this.calculateStepAndFontPixels()
-        this.ctx.font = canvas_font + "px monospace"
+        const { canvasFont, hstep, sstep } = this.calculateStepAndFontPixels()
+        this.ctx.font = canvasFont + "px monospace"
 
         /* Draw horizontal scale */
-        this.drawHorizontalLines(hstep, canvas_font, sstep)
+        this.drawHorizontalLines(hstep, canvasFont, sstep)
 
         /* Draw time stamps */
-        if (this.timestamps) this.drawTimestamps(sstep, canvas_font)
+        if (this.timestamps) this.drawTimestamps(sstep, canvasFont)
 
         /* Draw graph */
         this.drawGraph()
@@ -347,7 +347,7 @@ class Graph {
 function getTimestamp() {
     const d = new Date()
 
-    const timestamp_str =
+    const timestampString =
         (d.getHours() < 10 ? "0" : "") +
         d.getHours() +
         (d.getMinutes() < 10 ? ":0" : ":") +
@@ -355,7 +355,7 @@ function getTimestamp() {
         (d.getSeconds() < 10 ? ":0" : ":") +
         d.getSeconds()
 
-    return timestamp_str
+    return timestampString
 }
 
 /* Helper function to take a value value and return y-coordinate for the canvas */
