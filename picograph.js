@@ -66,7 +66,7 @@ function createLegendRect(labelDivID, color, label, valueID) {
             <svg width="10" height="10">
                 <rect width="10" height="10" style="fill: ${color}"/>
             </svg> 
-            <span>${label}:</span>
+            <span>${label}</span>
             <span id="${valueID}"></span>
         <div>
     `
@@ -86,17 +86,6 @@ function createGraph(
     vlinesFreq = 1,
     autoScaleMode = 1
 ) {
-    /* If autoscaling is disabled (or out of range) and min / max are not set, hard-set them to 0 and 100 respectively */
-    if ([1, 2].includes(autoScaleMode) == false) {
-        autoScaleMode = 0
-        if (Number.isFinite(minVal) === false) {
-            minVal = 0
-        }
-        if (Number.isFinite(maxVal) === false) {
-            maxVal = 100
-        }
-    }
-
     const valueIDs = createValueIDs(labels, canvasID)
 
     const graph = new Graph(
@@ -115,7 +104,7 @@ function createGraph(
     )
 
     for (let i = 0; i < labels.length; i++)
-        createLegendRect(labelDivID, graph.colors[i], labels[i], valueIDs[i])
+        createLegendRect(labelDivID, graph.colors[i], labels[i] + ":", valueIDs[i])
 
     return graph
 }
@@ -138,28 +127,40 @@ class Graph {
     ) {
         this.canvas = byID(canvasID)
         this.ctx = this.canvas.getContext("2d")
-        this.setWidthHeight()
+        this.setWidthHeightAndCssScale()
 
         this.cssScale = window.devicePixelRatio
         this.scalesteps = scalesteps
         this.noLabels = noLabels
+
         this.intervalSize = intervalSize * this.cssScale
-        this.nValuesFloat = this.width / this.intervalSize
-        this.nValues = Math.round(this.nValuesFloat) + 1
-        this.points = emptyArray(noLabels, this.nValues)
-        this.timestampsArray = emptyArray(1, this.nValues, "")
+        this.nPointsFloat = this.width / this.intervalSize
+
+        this.nPoints = Math.round(this.nPointsFloat) + 1
+        this.points = emptyArray(noLabels, this.nPoints)
+        this.timestampsArray = emptyArray(1, this.nPoints, "")
         this.colors = colorArray(noLabels)
+
         this.maxVal = maxVal
+        this.minVal = minVal
+
         this.valueIDs = valueIDs
         this.unit = unit
+
         this.vlines = vlines
-        this.timestamps = timestamps
         this.vlinesFreq = vlinesFreq
-        this.minVal = minVal
+        this.timestamps = timestamps
         this.autoScaleMode = autoScaleMode
+
+        /* If autoscaling is disabled (or out of range) and min / max are not set, hard-set them to 0 and 100 respectively */
+        if ([1, 2].includes(autoScaleMode) == false) {
+            this.autoScaleMode = 0
+            if (Number.isFinite(minVal) === false) this.minVal = 0
+            if (Number.isFinite(maxVal) === false) this.maxVal = 100
+        }
     }
 
-    setWidthHeight() {
+    setWidthHeightAndCssScale() {
         this.cssScale = window.devicePixelRatio
         this.canvas.width = this.canvas.clientWidth * this.cssScale
         this.canvas.height = this.canvas.clientHeight * this.cssScale
@@ -198,17 +199,19 @@ class Graph {
         }
     }
 
-    updateValues(values) {
+    updatePoints(values) {
         for (let i = 0; i < this.noLabels; i++) {
             /* Update scale */
             if (this.autoScaleMode > 0) this.updateMinMax(values, i)
 
             /* Shift new point into points array */
-            this.points = shiftArrayRowLeft(this.points, i, this.nValues, values[i])
-
-            /* Update value */
-            byID(this.valueIDs[i]).innerHTML = values[i].toFixed(2) + " " + this.unit
+            this.points = shiftArrayRowLeft(this.points, i, this.nPoints, values[i])
         }
+    }
+
+    updateLegends(values) {
+        for (let i = 0; i < this.noLabels; i++)
+            byID(this.valueIDs[i]).innerHTML = values[i].toFixed(2) + " " + this.unit
     }
 
     updateTimestamps() {
@@ -217,13 +220,13 @@ class Graph {
         this.timestampsArray = shiftArrayRowLeft(
             this.timestampsArray,
             0,
-            this.nValues,
+            this.nPoints,
             timestampString
         )
     }
 
     drawVerticalLines() {
-        for (let i = this.nValues - 1; i >= 0; i -= this.vlinesFreq) {
+        for (let i = this.nPoints - 1; i >= 0; i -= this.vlinesFreq) {
             /* Calculate line coordinates */
             const x = (i + 1) * this.intervalSize
 
@@ -269,7 +272,7 @@ class Graph {
         const xBoundPix = this.ctx.measureText((this.scalesteps * sstep).toFixed(2)).width
         const xBound = Math.floor(xBoundPix / this.intervalSize + 1)
 
-        for (let i = this.nValues - 1; i >= xBound; i -= this.vlinesFreq) {
+        for (let i = this.nPoints - 1; i >= xBound; i -= this.vlinesFreq) {
             /* Calculate line coordinates */
             const x = (i + 1) * this.intervalSize
 
@@ -286,7 +289,7 @@ class Graph {
 
     drawGraph() {
         for (let i = 0; i < this.noLabels; i++) {
-            for (let j = this.nValues - 1; j > 0; j--) {
+            for (let j = this.nPoints - 1; j > 0; j--) {
                 /* Calculate line coordinates */
                 const xstart = j * this.intervalSize
                 const xend = (j - 1) * this.intervalSize
@@ -309,37 +312,25 @@ class Graph {
     }
 
     update(values) {
-        this.updateValues(values)
-
-        /* Log time and add to timestampsArray array */
+        this.updatePoints(values)
+        this.updateLegends(values)
         this.updateTimestamps()
 
-        /* Clear canvas */
         this.ctx.clearRect(0, 0, this.width, this.height)
+        this.setWidthHeightAndCssScale()
 
-        /* Set height and width */
-        this.setWidthHeight()
-
-        /* update interval size */
-        this.intervalSize = this.width / this.nValuesFloat
-
-        /* Set line width */
+        this.intervalSize = this.width / this.nPointsFloat
         this.ctx.lineWidth = 2 * this.cssScale
 
-        /* Draw vertical scale */
         if (this.vlines) this.drawVerticalLines()
 
-        /* Calculate font size and space between scale lines */
         const { canvasFont, hstep, sstep } = this.calculateStepAndFontPixels()
         this.ctx.font = canvasFont + "px monospace"
 
-        /* Draw horizontal scale */
         this.drawHorizontalLines(hstep, canvasFont, sstep)
 
-        /* Draw time stamps */
         if (this.timestamps) this.drawTimestamps(sstep, canvasFont)
 
-        /* Draw graph */
         this.drawGraph()
     }
 }
