@@ -5,7 +5,7 @@ Simple and tiny graphing library for javascript.
 [Download picograph.js](picograph.js)
 
 # Demo
-![Demo Image](demo_screenshot.png)
+![Demo Image](screenshot.png)
 ```html
 <!DOCTYPE html>
 <html>
