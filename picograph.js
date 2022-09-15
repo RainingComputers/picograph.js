@@ -129,26 +129,31 @@ class Graph {
         this.ctx = this.canvas.getContext("2d")
         this.setWidthHeightAndCssScale()
 
-        this.cssScale = window.devicePixelRatio
-        this.scalesteps = scalesteps
-        this.noLabels = noLabels
-
+        this.cssScale = window.devicePixelRatio 
         this.intervalSize = intervalSize * this.cssScale
+        
         this.nPointsFloat = this.width / this.intervalSize
-
         this.nPoints = Math.round(this.nPointsFloat) + 1
         this.points = emptyArray(noLabels, this.nPoints)
-        this.timestampsArray = emptyArray(1, this.nPoints, "")
-        this.colors = colorArray(noLabels)
-
         this.maxVal = maxVal
         this.minVal = minVal
-
+        
+        this.noLabels = noLabels
         this.valueIDs = valueIDs
         this.unit = unit
+        
+        this.timestampsArray = emptyArray(1, this.nPoints, "")
+
+        this.scalesteps = scalesteps
+        this.vlinesFreq = vlinesFreq
+        
+        this.colors = colorArray(noLabels)
+        
+        this.fontSize = null
+        this.hstep = null
+        this.sstep = null
 
         this.vlines = vlines
-        this.vlinesFreq = vlinesFreq
         this.timestamps = timestamps
         this.autoScaleMode = autoScaleMode
 
@@ -160,18 +165,10 @@ class Graph {
         }
     }
 
-    setWidthHeightAndCssScale() {
-        this.cssScale = window.devicePixelRatio
-        this.canvas.width = this.canvas.clientWidth * this.cssScale
-        this.canvas.height = this.canvas.clientHeight * this.cssScale
-        this.width = this.ctx.canvas.width
-        this.height = this.ctx.canvas.height
-    }
+    updateMinMax(value) {
+        if (value < this.minVal) this.minVal = value
 
-    updateMinMax(values, i) {
-        if (values[i] < this.minVal) this.minVal = values[i]
-
-        if (values[i] > this.maxVal) this.maxVal = values[i]
+        if (value > this.maxVal) this.maxVal = value
 
         let valueMinMaxDelta = Math.abs(this.maxVal - this.minVal)
 
@@ -189,20 +186,16 @@ class Graph {
             return
         } else {
             /* autoScaleMode == 1 */
-            if (values[i] > this.maxVal - valueMinMaxDelta * 0.05) {
-                this.maxVal = newMaxVal
-            }
+            if (value > this.maxVal - valueMinMaxDelta * 0.05) this.maxVal = newMaxVal
 
-            if (values[i] < this.minVal + valueMinMaxDelta * 0.05) {
-                this.minVal = newMinVal
-            }
+            if (value < this.minVal + valueMinMaxDelta * 0.05) this.minVal = newMinVal
         }
     }
 
     updatePoints(values) {
         for (let i = 0; i < this.noLabels; i++) {
             /* Update scale */
-            if (this.autoScaleMode > 0) this.updateMinMax(values, i)
+            if (this.autoScaleMode > 0) this.updateMinMax(values[i])
 
             /* Shift new point into points array */
             this.points = shiftArrayRowLeft(this.points, i, this.nPoints, values[i])
@@ -239,24 +232,40 @@ class Graph {
         }
     }
 
-    calculateStepAndFontPixels() {
-        const hstep = this.height / this.scalesteps
-        const sstep = (this.maxVal - this.minVal) / this.scalesteps
-
-        const canvasFont = Math.min(0.5 * hstep, 15 * this.cssScale)
-        return { canvasFont, hstep, sstep }
+    clear() {
+        this.ctx.clearRect(0, 0, this.width, this.height)
     }
 
-    drawHorizontalLines(hstep, canvasFont, sstep) {
+    setWidthHeightAndCssScale() {
+        this.cssScale = window.devicePixelRatio
+        this.canvas.width = this.canvas.clientWidth * this.cssScale
+        this.canvas.height = this.canvas.clientHeight * this.cssScale
+        this.width = this.ctx.canvas.width
+        this.height = this.ctx.canvas.height
+    }
+
+    setIntervalSizeAndLineWidth() {
+        this.intervalSize = this.width / this.nPointsFloat
+        this.ctx.lineWidth = 2 * this.cssScale
+    }
+
+    setStepAndFontSizePixels() {
+        this.hstep = this.height / this.scalesteps
+        this.sstep = (this.maxVal - this.minVal) / this.scalesteps
+        this.fontSize = Math.min(0.5 * this.hstep, 15 * this.cssScale)
+        this.ctx.font = this.fontSize + "px monospace"
+    }
+
+    drawHorizontalLines() {
         let entityDecode = document.createElement("textarea")
         entityDecode.innerHTML = this.unit
 
         for (let i = 1; i <= this.scalesteps; i++) {
-            const y = this.height - i * hstep
+            const y = this.height - i * this.hstep
             const xoffset = 2
-            const yoffset = canvasFont + 2 * this.cssScale
+            const yoffset = this.fontSize + 2 * this.cssScale
             this.ctx.fillText(
-                (i * sstep + this.minVal).toFixed(2) + " " + entityDecode.value,
+                (i * this.sstep + this.minVal).toFixed(2) + " " + entityDecode.value,
                 xoffset,
                 y + yoffset
             )
@@ -268,8 +277,8 @@ class Graph {
         }
     }
 
-    drawTimestamps(sstep, canvasFont) {
-        const xBoundPix = this.ctx.measureText((this.scalesteps * sstep).toFixed(2)).width
+    drawTimestamps() {
+        const xBoundPix = this.ctx.measureText((this.scalesteps * this.sstep).toFixed(2)).width
         const xBound = Math.floor(xBoundPix / this.intervalSize + 1)
 
         for (let i = this.nPoints - 1; i >= xBound; i -= this.vlinesFreq) {
@@ -277,7 +286,7 @@ class Graph {
             const x = (i + 1) * this.intervalSize
 
             /* Put time stamps */
-            const xoffset = canvasFont + 2 * this.cssScale
+            const xoffset = this.fontSize + 2 * this.cssScale
             const yoffset =
                 this.ctx.measureText(this.timestampsArray[0][i]).width + 4 * this.cssScale
             this.ctx.rotate(Math.PI / 2)
@@ -316,21 +325,14 @@ class Graph {
         this.updateLegends(values)
         this.updateTimestamps()
 
-        this.ctx.clearRect(0, 0, this.width, this.height)
+        this.clear()
         this.setWidthHeightAndCssScale()
-
-        this.intervalSize = this.width / this.nPointsFloat
-        this.ctx.lineWidth = 2 * this.cssScale
+        this.setIntervalSizeAndLineWidth()
+        this.setStepAndFontSizePixels()
 
         if (this.vlines) this.drawVerticalLines()
-
-        const { canvasFont, hstep, sstep } = this.calculateStepAndFontPixels()
-        this.ctx.font = canvasFont + "px monospace"
-
-        this.drawHorizontalLines(hstep, canvasFont, sstep)
-
-        if (this.timestamps) this.drawTimestamps(sstep, canvasFont)
-
+        this.drawHorizontalLines()
+        if (this.timestamps) this.drawTimestamps()
         this.drawGraph()
     }
 }
