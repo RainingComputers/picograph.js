@@ -5,48 +5,6 @@
     https://github.com/RainingComputers
 */
 
-const colors = [
-    "#e52b50",
-    "#008000",
-    "#0000ff",
-    "#ff00ff",
-    "#a52a2a",
-    "#00008b",
-    "#008b8b",
-    "#a9a9a9",
-    "#006400",
-    "#bdb76b",
-    "#8b008b",
-    "#556b2f",
-    "#ff8c00",
-    "#9932cc",
-    "#8b0000",
-    "#e9967a",
-    "#9400d3",
-    "#ff00ff",
-    "#ffd700",
-    "#008000",
-    "#4b0082",
-    "#f0e68c",
-    "#add8e6",
-    "#e0ffff",
-    "#90ee90",
-    "#d3d3d3",
-    "#ffb6c1",
-    "#ffffe0",
-    "#800000",
-    "#000080",
-    "#808000",
-    "#ffa500",
-    "#ffc0cb",
-    "#800080",
-    "#800080",
-    "#ff0000",
-    "#c0c0c0",
-    "#ffffff",
-    "#ffff00",
-]
-
 function byID(id) {
     return document.getElementById(id)
 }
@@ -61,13 +19,16 @@ function createValueIDs(labels, canvasID) {
 }
 
 function createLegendRect(labelDivID, color, label, valueID) {
+    const labelSpan = `<span>${label}</span>`
+    const valueSpan = label.at(-1) == ":" ? `<span id="${valueID}"></span>` : ""
+
     byID(labelDivID).innerHTML += `
         <div style="display: inline-block;">
             <svg width="10" height="10">
                 <rect width="10" height="10" style="fill: ${color}"/>
             </svg> 
-            <span>${label}</span>
-            <span id="${valueID}"></span>
+            ${labelSpan}
+            ${valueSpan}
         <div>
     `
 }
@@ -129,26 +90,26 @@ class Graph {
         this.ctx = this.canvas.getContext("2d")
         this.setWidthHeightAndCssScale()
 
-        this.cssScale = window.devicePixelRatio 
+        this.cssScale = window.devicePixelRatio
         this.intervalSize = intervalSize * this.cssScale
-        
+
         this.nPointsFloat = this.width / this.intervalSize
         this.nPoints = Math.round(this.nPointsFloat) + 1
-        this.points = emptyArray(noLabels, this.nPoints)
+        this.points = emptyArray2D(noLabels, this.nPoints)
         this.maxVal = maxVal
         this.minVal = minVal
-        
+
         this.noLabels = noLabels
         this.valueIDs = valueIDs
         this.unit = unit
-        
-        this.timestampsArray = emptyArray(1, this.nPoints, "")
+
+        this.timestampsArray = emptyArray(this.nPoints, "")
 
         this.scalesteps = scalesteps
         this.vlinesFreq = vlinesFreq
-        
+
         this.colors = colorArray(noLabels)
-        
+
         this.fontSize = null
         this.hstep = null
         this.sstep = null
@@ -198,7 +159,7 @@ class Graph {
             if (this.autoScaleMode > 0) this.updateMinMax(values[i])
 
             /* Shift new point into points array */
-            this.points = shiftArrayRowLeft(this.points, i, this.nPoints, values[i])
+            this.points[i] = shiftArrayLeft(this.points[i], values[i])
         }
     }
 
@@ -210,12 +171,7 @@ class Graph {
     updateTimestamps() {
         const timestampString = getTimestamp()
 
-        this.timestampsArray = shiftArrayRowLeft(
-            this.timestampsArray,
-            0,
-            this.nPoints,
-            timestampString
-        )
+        this.timestampsArray = shiftArrayLeft(this.timestampsArray, timestampString)
     }
 
     drawVerticalLines() {
@@ -287,10 +243,9 @@ class Graph {
 
             /* Put time stamps */
             const xoffset = this.fontSize + 2 * this.cssScale
-            const yoffset =
-                this.ctx.measureText(this.timestampsArray[0][i]).width + 4 * this.cssScale
+            const yoffset = this.ctx.measureText(this.timestampsArray[i]).width + 4 * this.cssScale
             this.ctx.rotate(Math.PI / 2)
-            this.ctx.fillText(this.timestampsArray[0][i], this.height - yoffset, -x + xoffset)
+            this.ctx.fillText(this.timestampsArray[i], this.height - yoffset, -x + xoffset)
             this.ctx.stroke()
             this.ctx.rotate(-Math.PI / 2)
         }
@@ -356,24 +311,61 @@ function scaleInvert(value, minVal, maxVal, height) {
     return (1 - (value - minVal) / (maxVal - minVal)) * height
 }
 
-function shiftArrayRowLeft(array, row, ncols, newVal) {
-    for (let i = 0; i < ncols - 1; i++) array[row][i] = array[row][i + 1]
-
-    array[row][ncols - 1] = newVal
-
+function shiftArrayLeft(array, newVal) {
+    array.shift()
+    array.push(newVal)
     return array
 }
 
-function emptyArray(nrows, ncols, fill = undefined) {
-    const arr = []
-
-    for (let i = 0; i < nrows; i++) {
-        arr[i] = []
-        for (let j = 0; j < ncols; j++) arr[i][j] = fill
-    }
-
-    return arr
+function emptyArray2D(nrows, ncols, fill = undefined) {
+    return Array.from({ length: nrows }, (_) => Array.from({ length: ncols }, (_) => fill))
 }
+
+function emptyArray(length, fill = undefined) {
+    return Array.from({ length }, (_) => fill)
+}
+
+const colors = [
+    "#e52b50",
+    "#008000",
+    "#0000ff",
+    "#ff00ff",
+    "#a52a2a",
+    "#00008b",
+    "#008b8b",
+    "#a9a9a9",
+    "#006400",
+    "#bdb76b",
+    "#8b008b",
+    "#556b2f",
+    "#ff8c00",
+    "#9932cc",
+    "#8b0000",
+    "#e9967a",
+    "#9400d3",
+    "#ff00ff",
+    "#ffd700",
+    "#008000",
+    "#4b0082",
+    "#f0e68c",
+    "#add8e6",
+    "#e0ffff",
+    "#90ee90",
+    "#d3d3d3",
+    "#ffb6c1",
+    "#ffffe0",
+    "#800000",
+    "#000080",
+    "#808000",
+    "#ffa500",
+    "#ffc0cb",
+    "#800080",
+    "#800080",
+    "#ff0000",
+    "#c0c0c0",
+    "#ffffff",
+    "#ffff00",
+]
 
 function colorArray(len) {
     const colorArray = []
