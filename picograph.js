@@ -51,7 +51,8 @@ function createGraph(
 
     const graph = new Graph(
         canvasID,
-        labels.length,
+        labelDivID,
+        labels,
         valueIDs,
         unit,
         intervalSize,
@@ -64,9 +65,7 @@ function createGraph(
         autoScaleMode
     )
 
-    for (let i = 0; i < labels.length; i++)
-        createLegendRect(labelDivID, graph.colors[i], labels[i] + ":", valueIDs[i])
-
+    graph.createLegends()
     return graph
 }
 
@@ -74,7 +73,8 @@ function createGraph(
 class Graph {
     constructor(
         canvasID,
-        noLabels,
+        labelDivID,
+        labels,
         valueIDs,
         unit,
         intervalSize,
@@ -93,13 +93,16 @@ class Graph {
         this.cssScale = window.devicePixelRatio
         this.intervalSize = intervalSize * this.cssScale
 
+        this.labelDivID = labelDivID
+        this.labels = labels
+        this.noLabels = labels.length
+
         this.nPointsFloat = this.width / this.intervalSize
         this.nPoints = Math.round(this.nPointsFloat) + 1
-        this.points = emptyArray2D(noLabels, this.nPoints)
+        this.points = emptyArray2D(this.noLabels, this.nPoints)
         this.maxVal = maxVal
         this.minVal = minVal
 
-        this.noLabels = noLabels
         this.valueIDs = valueIDs
         this.unit = unit
 
@@ -108,7 +111,7 @@ class Graph {
         this.scalesteps = scalesteps
         this.vlinesFreq = vlinesFreq
 
-        this.colors = colorArray(noLabels)
+        this.colors = colorArray(this.noLabels)
 
         this.fontSize = null
         this.hstep = null
@@ -124,6 +127,18 @@ class Graph {
             if (Number.isFinite(minVal) === false) this.minVal = 0
             if (Number.isFinite(maxVal) === false) this.maxVal = 100
         }
+    }
+
+    createLegends() {
+        byID(this.labelDivID).innerHTML = ""
+
+        for (let i = 0; i < this.noLabels; i++)
+            createLegendRect(
+                this.labelDivID,
+                this.colors[i],
+                this.labels[i] + ":",
+                this.valueIDs[i]
+            )
     }
 
     updateMinMax(value) {
@@ -291,6 +306,13 @@ class Graph {
         this.drawGraph()
     }
 }
+
+// function switchGraph(previousGraph, newGraph) {
+//     byID(previousGraph.labelDivID).innerHTML = ""
+//     previousGraph.clear()
+//     for (let i = 0; i < noLabels; i++)
+//         createLegendRect(labelDivID, graph.colors[i], labels[i] + ":", valueIDs[i])
+// }
 
 function getTimestamp() {
     const d = new Date()
