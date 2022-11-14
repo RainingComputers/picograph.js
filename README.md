@@ -95,6 +95,17 @@ Graph.update(values)
 
 -   **values** : Array of values to add to the graph.
 
+```javascript
+switchGraph(previousGraph, newGraph)
+```
+
+**Description** : If you want to share the same canvas and the label div among multiple graph instances, use `switchGraph`.
+
+**Arguments** :
+
+-   **previousGraph** : Previous graph instance to switch from.
+-   **newGraph** : New graph instance to switch to.
+
 # Note
 
 Always use CSS or `style` to set height and width of the canvas.

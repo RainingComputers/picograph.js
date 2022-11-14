@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>PicoGraphDemo</title>
+    <script src="picograph.js"></script>
+</head>
+
+<body style="font-family: Lucida Console, Monaco, monospace;">
+
+    <h1>PicoGraphDemo</h1>
+
+    <!-- Canvas for the graph -->
+    <canvas
+        id="graphDemo"
+        style="width: 900px; height:200px; border:2px solid #000000;"
+    >
+    </canvas>
+
+    <!-- div for legends/labels -->
+    <div id="graphLabels"></div>
+
+    <script>
+        /* Create graph using picograph */
+        let graph0 = createGraph("graphDemo",
+            ["Random Y0", "Random Y1"],
+            "units", "graphLabels", 50, 10, 0, true, true);
+
+        let graph1 = createGraph("graphDemo",
+            ["Random Z0", "Random Z1", "Random Z2"],
+            "units", "graphLabels", 50, 5, 0, true, true);
+
+        /* Update values every second */
+        let interval = setInterval(updateGraph0, 1000);
+
+        /* After 8 seconds */
+        setTimeout(() => {
+            /* Stop updating graph0  */
+            clearInterval(interval)
+            /* Switch to graph1 */
+            switchGraph(graph0, graph1)
+            /* Start updating graph1 */
+            setInterval(updateGraph1, 1000)
+        }, 8000)
+
+        function updateGraph0() {
+            /* Get new values */
+            yrand0 = Math.random() * 10;
+            yrand1 = Math.random() * 10;
+
+            /* Update graph */
+            graph0.update([yrand0, yrand1])
+        }
+
+        function updateGraph1() {
+            /* Get new values */
+            zrand0 = Math.random() * 5;
+            zrand1 = Math.random() * 5;
+            zrand2 = Math.random() * 5;
+
+            /* Update graph */
+            graph1.update([zrand0, zrand1, zrand2])
+        }
+
+    </script>
+</body>
+
+</html>

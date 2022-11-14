@@ -65,7 +65,7 @@ function createGraph(
         autoScaleMode
     )
 
-    graph.createLegends()
+    if (byID(labelDivID).innerHTML === "") graph.createLegends()
     return graph
 }
 
@@ -307,12 +307,10 @@ class Graph {
     }
 }
 
-// function switchGraph(previousGraph, newGraph) {
-//     byID(previousGraph.labelDivID).innerHTML = ""
-//     previousGraph.clear()
-//     for (let i = 0; i < noLabels; i++)
-//         createLegendRect(labelDivID, graph.colors[i], labels[i] + ":", valueIDs[i])
-// }
+function switchGraph(previousGraph, newGraph) {
+    previousGraph.clear()
+    newGraph.createLegends()
+}
 
 function getTimestamp() {
     const d = new Date()
