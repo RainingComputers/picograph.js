@@ -33,58 +33,24 @@ function createLegendRect(labelDivID, color, label, valueID) {
     `
 }
 
-function createGraph(
-    canvasID,
-    labels,
-    unit,
-    labelDivID,
-    intervalSize,
-    maxVal,
-    minVal = 0,
-    vlines = false,
-    timestamps = false,
-    scalesteps = 5,
-    vlinesFreq = 1,
-    autoScaleMode = 1
-) {
-    const valueIDs = createValueIDs(labels, canvasID)
-
-    const graph = new Graph(
-        canvasID,
-        labelDivID,
-        labels,
-        valueIDs,
-        unit,
-        intervalSize,
-        maxVal,
-        minVal,
-        vlines,
-        timestamps,
-        scalesteps,
-        vlinesFreq,
-        autoScaleMode
-    )
-
-    return graph
-}
-
 /* Graph class, plots and updates graphs */
 class Graph {
     constructor(
         canvasID,
-        labelDivID,
         labels,
-        valueIDs,
         unit,
+        labelDivID,
         intervalSize,
         maxVal,
-        minVal,
-        vlines,
-        timestamps,
-        scalesteps,
-        vlinesFreq,
-        autoScaleMode
+        minVal = 0,
+        vlines = false,
+        timestamps = false,
+        scalesteps = 5,
+        vlinesFreq = 1,
+        autoScaleMode = 1
     ) {
+        const valueIDs = createValueIDs(labels, canvasID)
+
         this.initializeElements(canvasID, labelDivID, valueIDs)
 
         this.setConfig(
