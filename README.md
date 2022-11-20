@@ -62,8 +62,8 @@ Simple and tiny graphing library for javascript.
 [Download picograph.js](picograph.js)
 
 ```javascript
-function createGraph(canvasID, labels, unit, labelDivID, intervalSize,
-    maxVal, vlines=false, timestamps=false, scalesteps=5, vlinesFreq=1, autoScaleMode=1)
+new Graph(canvasID, labels, unit, labelDivID, intervalSize,
+    maxVal, minVal=0, vlines=false, timestamps=false, scalesteps=5, vlinesFreq=1, autoScaleMode=1)
 ```
 
 **Arguments** :
@@ -96,7 +96,25 @@ Graph.update(values)
 -   **values** : Array of values to add to the graph.
 
 ```javascript
-switchGraph(previousGraph, newGraph)
+Graph.updateConfig(labels, unit, intervalSize, 
+    maxVal, minVal=0, vlines=false, timestamps=false, scalesteps=5, vlinesFreq=1, autoScaleMode=1)
+```
+
+**Description** : If you want to update the config dynamically. Calling this function will also clear the graph
+
+```javascript
+Graph.setColors(colors)
+```
+
+**Description**: Set custom colors
+
+**Arguments** :
+
+-   **colors**: Array of color strings
+
+
+```javascript
+Graph.switchGraph(previousGraph, newGraph)
 ```
 
 **Description** : If you want to share the same canvas and the label div among multiple graph instances, use `switchGraph`.
