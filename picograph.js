@@ -175,13 +175,15 @@ class Graph {
         unit,
         intervalSize,
         maxVal,
-        minVal,
-        vlines,
-        timestamps,
-        scalesteps,
-        vlinesFreq,
-        autoScaleMode
+        minVal = 0,
+        vlines = false,
+        timestamps = false,
+        scalesteps = 5,
+        vlinesFreq = 1,
+        autoScaleMode = 1
     ) {
+        this.clear()
+
         this.setConfig(
             labels,
             unit,
@@ -196,11 +198,12 @@ class Graph {
 
         this.resetState(intervalSize)
 
-        if (byID(labelDivID).innerHTML === "") this.createLegends()
+        this.createLegends()
     }
 
     setColors(colors) {
         this.colors = colors
+        this.createLegends()
     }
 
     updateMinMax(value) {
