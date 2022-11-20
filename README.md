@@ -13,47 +13,47 @@ Simple and tiny graphing library for javascript.
 ```html
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>PicoGraphDemo</title>
-        <script src="picograph.js"></script>
-    </head>
-    <body style="font-family: Lucida Console, Monaco, monospace;">
-        <h1>PicoGraphDemo</h1>
 
-        <!-- Canvas for the graph -->
-        <canvas id="graphDemo" style="width: 900px; height:200px; border:2px solid #000000;">
-        </canvas>
+<head>
+    <title>PicoGraphDemo</title>
+    <script src="picograph.js"></script>
+</head>
 
-        <!-- div for legends/labels -->
-        <div id="graphLabels"></div>
+<body style="font-family: Lucida Console, Monaco, monospace;">
 
-        <script>
-            /* Create graph using picograph */
-            let demograph = createGraph(
-                "graphDemo",
-                ["Random Y0", "Random Y1"],
-                "units",
-                "graphLabels",
-                50,
-                10,
-                0,
-                true,
-                true
-            )
+    <h1>PicoGraphDemo</h1>
 
-            /* Update values every second */
-            setInterval(updateEverySecond, 1000)
+    <!-- Canvas for the graph -->
+    <canvas
+        id="graphDemo"
+        style="width: 900px; height:200px; border:2px solid #000000;"
+    >
+    </canvas>
 
-            function updateEverySecond() {
-                /* Get new values */
-                yrand0 = Math.random() * 10
-                yrand1 = Math.random() * 10
+    <!-- div for legends/labels -->
+    <div id="graphLabels"></div>
 
-                /* Update graph */
-                demograph.update([yrand0, yrand1])
-            }
-        </script>
-    </body>
+    <script>
+        /* Create graph using picograph */
+        let demograph = new Graph("graphDemo",
+            ["Random Y0", "Random Y1"],
+            "units", "graphLabels", 50, 10, 0, true, true);
+
+        /* Update values every second */
+        setInterval(updateEverySecond, 1000);
+
+        function updateEverySecond() {
+            /* Get new values */
+            yrand0 = Math.random() * 10;
+            yrand1 = Math.random() * 10;
+
+            /* Update graph */
+            demograph.update([yrand0, yrand1])
+        }
+
+    </script>
+</body>
+
 </html>
 ```
 
