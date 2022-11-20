@@ -312,7 +312,7 @@ class Graph {
 
     drawTimestamps() {
         const xBoundPix = this.ctx.measureText((this.scalesteps * this.sstep).toFixed(2)).width
-        const xBound = Math.floor(xBoundPix / this.intervalSize + 1)
+        const xBound = Math.floor(xBoundPix / this.intervalSize + 1) + 1
 
         for (let i = this.nPoints - 1; i >= xBound; i -= this.vlinesFreq) {
             /* Calculate line coordinates */
