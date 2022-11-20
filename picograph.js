@@ -65,7 +65,6 @@ function createGraph(
         autoScaleMode
     )
 
-    if (byID(labelDivID).innerHTML === "") graph.createLegends()
     return graph
 }
 
@@ -86,39 +85,58 @@ class Graph {
         vlinesFreq,
         autoScaleMode
     ) {
+        this.initializeElements(canvasID, labelDivID, valueIDs)
+
+        this.setConfig(
+            labels,
+            unit,
+            maxVal,
+            minVal,
+            vlines,
+            timestamps,
+            scalesteps,
+            vlinesFreq,
+            autoScaleMode
+        )
+
+        this.resetState(intervalSize)
+
+        if (byID(labelDivID).innerHTML === "") this.createLegends()
+    }
+
+    initializeElements(canvasID, labelDivID, valueIDs) {
         this.canvas = byID(canvasID)
         this.ctx = this.canvas.getContext("2d")
         this.setWidthHeightAndCssScale()
-
-        this.cssScale = window.devicePixelRatio
-        this.intervalSize = intervalSize * this.cssScale
-
         this.labelDivID = labelDivID
-        this.labels = labels
-        this.noLabels = labels.length
-
-        this.nPointsFloat = this.width / this.intervalSize
-        this.nPoints = Math.round(this.nPointsFloat) + 1
-        this.points = emptyArray2D(this.noLabels, this.nPoints)
-        this.maxVal = maxVal
-        this.minVal = minVal
-
         this.valueIDs = valueIDs
+    }
+
+    setConfig(
+        labels,
+        unit,
+        maxVal,
+        minVal,
+        vlines,
+        timestamps,
+        scalesteps,
+        vlinesFreq,
+        autoScaleMode
+    ) {
+        this.labels = labels
         this.unit = unit
-
-        this.timestampsArray = emptyArray(this.nPoints, "")
-
-        this.scalesteps = scalesteps
         this.vlinesFreq = vlinesFreq
-
-        this.colors = colorArray(this.noLabels)
-
-        this.fontSize = null
-        this.hstep = null
-        this.sstep = null
-
         this.vlines = vlines
         this.timestamps = timestamps
+        this.noLabels = labels.length
+        this.colors = colorArray(this.noLabels)
+        this.setScalingConfig(maxVal, minVal, scalesteps, autoScaleMode)
+    }
+
+    setScalingConfig(maxVal, minVal, scalesteps, autoScaleMode) {
+        this.maxVal = maxVal
+        this.minVal = minVal
+        this.scalesteps = scalesteps
         this.autoScaleMode = autoScaleMode
 
         /* If autoscaling is disabled (or out of range) and min / max are not set, hard-set them to 0 and 100 respectively */
@@ -127,6 +145,17 @@ class Graph {
             if (Number.isFinite(minVal) === false) this.minVal = 0
             if (Number.isFinite(maxVal) === false) this.maxVal = 100
         }
+    }
+
+    resetState(intervalSize) {
+        this.intervalSize = intervalSize * this.cssScale
+        this.nPointsFloat = this.width / this.intervalSize
+        this.nPoints = Math.round(this.nPointsFloat) + 1
+        this.points = emptyArray2D(this.noLabels, this.nPoints)
+        this.timestampsArray = emptyArray(this.nPoints, "")
+        this.fontSize = null
+        this.hstep = null
+        this.sstep = null
     }
 
     createLegends() {
@@ -139,6 +168,39 @@ class Graph {
                 this.labels[i] + ":",
                 this.valueIDs[i]
             )
+    }
+
+    updateConfig(
+        labels,
+        unit,
+        intervalSize,
+        maxVal,
+        minVal,
+        vlines,
+        timestamps,
+        scalesteps,
+        vlinesFreq,
+        autoScaleMode
+    ) {
+        this.setConfig(
+            labels,
+            unit,
+            maxVal,
+            minVal,
+            vlines,
+            timestamps,
+            scalesteps,
+            vlinesFreq,
+            autoScaleMode
+        )
+
+        this.resetState(intervalSize)
+
+        if (byID(labelDivID).innerHTML === "") this.createLegends()
+    }
+
+    setColors(colors) {
+        this.colors = colors
     }
 
     updateMinMax(value) {
